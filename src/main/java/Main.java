@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -9,10 +9,26 @@ public class Main {
        ServerSocket serverSocket = new ServerSocket(4221);
        serverSocket.setReuseAddress(true);
 
-       serverSocket.accept(); // Wait for connection from client.
-       System.out.println("accepted new connection");
+       HandleClient(serverSocket.accept());
+
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
      }
+
+
   }
+
+  public static void HandleClient(Socket socket) {
+      System.out.println("Accepted new connection");
+      try {
+
+          socket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+          socket.close();
+
+
+      }catch (IOException e) {
+          System.out.println("IOException: " + e.getMessage());
+      }
+  }
+
 }
