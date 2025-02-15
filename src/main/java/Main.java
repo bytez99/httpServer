@@ -9,15 +9,19 @@ public class Main   {
     private static final int PORT = 4221;
 
   public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        ExecutorService executor = Executors.newCachedThreadPool();
-        serverSocket.setReuseAddress(true);
-        while (true) {
-            Socket socket = serverSocket.accept();
-            executor.execute(new HandleConnection(socket));
-            }
-        }
+      try {
+          ServerSocket serverSocket = new ServerSocket(PORT);
+          ExecutorService executor = Executors.newCachedThreadPool();
+          serverSocket.setReuseAddress(true);
+          while (true) {
+              Socket socket = serverSocket.accept();
+              executor.execute(new HandleConnection(socket));
+          }
+      }catch (IOException e){
+          System.out.println("IO Exception" + e.getMessage());
+      }
     }
+}
 
 class HandleConnection implements Runnable{
     private Socket socket;
