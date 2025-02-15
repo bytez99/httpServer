@@ -1,6 +1,13 @@
+import com.sun.security.jgss.GSSUtil;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -75,20 +82,41 @@ class HandleConnection implements Runnable{
 
 
             if (requestTarget.equals("/")){
+
                 outputStream.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+
             } else if (requestTarget.contains("/echo") && requestTarget.length() > 5) {
+
                 String echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.length());
                 System.out.println("echo: " + echo);
                 String echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
                 outputStream.write(echoString.getBytes());
+
             } else if(requestTarget.equals("/user-agent")){
+
                 String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 12\r\n\r\n" + userAgent;
                 outputStream.write(userAgentString.getBytes());
+
+            }else if(requestTarget.contains("/files") && requestTarget.length() > 5){
+
+                String filename = requestTarget.substring(requestTarget.lastIndexOf("/") + 1);
+                File file = new File(filename);
+
+                if (file.exists()){
+
+                    byte[] fileContent = Files.readAllBytes(Paths.get(filename));
+                    String response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 13\r\n\r\n"+new String(fileContent);
+                    outputStream.write(response.getBytes());
+                }else {
+
+                    outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+                }
             }
             else {
                 outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
             }
 
+            outputStream.flush();
             outputStream.close();
             socket.close();
 
