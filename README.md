@@ -16,7 +16,7 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/httpServer.git
+   git clone https://github.com/bytez99/httpServer.git
    cd httpServer
    ```
 2. **Compile the Java files:**
@@ -36,11 +36,11 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
   ```
 - Retrieve a file:
   ```sh
-  curl -X GET http://localhost:8080/files/sample.txt
+  curl -X GET http://localhost:8080/files/sample
   ```
 - Create a file with a POST request:
   ```sh
-  curl -X POST http://localhost:8080/files/sample.txt -d "Hello, World!"
+  curl -X POST http://localhost:8080/files/sample -d "Hello, World!"
   ```
 - Echo a string (min. 3 characters):
   ```sh
@@ -58,5 +58,7 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 - Implement a simple caching mechanism
 
 ## License
-This project is open-source and available under the [MIT License](LICENSE).
+This project is open-source and available under the [MIT License](./LICENSE) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT).
+
+
 
