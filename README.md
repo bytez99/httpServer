@@ -55,8 +55,9 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 - Add support for additional HTTP methods (PUT, DELETE)
 - Implement persistent logging
 - Improve error handling and request validation
-- Implement a simple caching mechanism
-
+- Add support for the Accept-Encoding and Content-Encoding headers.
+- Add support for Accept-Encoding headers that contain multiple compression schemes.
+- Add support for gzip compression
 
 
 
