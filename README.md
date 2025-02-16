@@ -57,8 +57,6 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 - Improve error handling and request validation
 - Implement a simple caching mechanism
 
-## License
-This project is open-source and available under the [MIT License](./LICENSE) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT).
 
 
 
