@@ -21,11 +21,11 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
    ```
 2. **Compile the Java files:**
    ```sh
-   javac HttpServer.java
+   javac Main.java
    ```
 3. **Run the server:**
    ```sh
-   java HttpServer
+   java Main
    ```
 
 ## Example Usage
