@@ -1,13 +1,10 @@
-import com.sun.security.jgss.GSSUtil;
+import org.graalvm.collections.EconomicMapUtil;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,7 +12,7 @@ import java.util.concurrent.Executors;
 public class Main   {
     private static final int PORT = 4221;
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
       try {
           ServerSocket serverSocket = new ServerSocket(PORT);
           ExecutorService executor = Executors.newCachedThreadPool();
@@ -56,7 +53,13 @@ class HandleConnection implements Runnable{
 
             String userAgent = null;
             String host = null;
+            String contentType = null;
             String requestLine = reader.readLine();
+            String[] requestLines = requestLine.split(" ");
+            String httpMethod = requestLines[0];
+            String requestTarget = requestLines[1];
+            String httpVersion = requestLines[2];
+            int contentLength = 0;
 
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -65,23 +68,63 @@ class HandleConnection implements Runnable{
                     userAgent = trim;
                 } else if (line.toLowerCase().startsWith("host:")) {
                     host = trim;
+                }else if (line.toLowerCase().startsWith("content-length")){
+                    contentLength = Integer.parseInt(trim);
+                }else if (line.toLowerCase().startsWith("content-type")){
+                    contentType = trim;
                 }
             }
 
-            System.out.println("HTTP Method: " + requestLine);
-            System.out.println("Host: " + host);
-            System.out.println("User-Agent: " + userAgent);
+            StringBuilder body = new StringBuilder();
+            if (contentLength > 0){
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                body.append(buffer);
+            }
+
+            String requestBody = body.toString();
+
+            System.out.println("");
+            System.out.println("Request Line");
+            System.out.println(httpMethod + " " + requestTarget + " " + httpVersion);
+
+            System.out.println("Headers:");
+            System.out.println("Host:" + host);
+            System.out.println("User-Agent:" + userAgent);
+            System.out.println("Content-Type:" + contentType);
+            System.out.println("Content-Length:" + contentLength);
+
+            System.out.println("Body:");
+            System.out.println("requestBody: " + requestBody);
 
 
 
-            String[] requestLines = requestLine.split(" ");
 
-            //String httpMethod = requestLines[0];
-            String requestTarget = requestLines[1];
-            //String httpVersion = requestLines[2];
+            if(httpMethod.equals("POST") && requestTarget.contains("/files") && requestTarget.length() > 6){
+                try {
+                    System.out.println("requestTarget: " + requestTarget);
+                    File file = new File(requestTarget.substring(7, requestTarget.length()));
+                    if (file.createNewFile()){
+                        FileWriter fileWriter = new FileWriter(file);
+                        fileWriter.write(requestBody);
+                        fileWriter.close();
+                        String response = "HTTP/1.1 201 Created\r\n\n\n";
+                        outputStream.write(response.getBytes());
 
+                    }else {
+                        String response = "HTTP/1.1 404 Not Found\r\n\n\n";
+                        outputStream.write(response.getBytes());
+                    }
 
-            if (requestTarget.equals("/")){
+                }catch (IOException e){
+                    System.out.println("IO Exception: " + e.getMessage());
+                    String response = "HTTP/1.1 404 Not Found\r\n\n\n";
+                    outputStream.write(response.getBytes());
+                }
+
+            }
+
+            else if (requestTarget.equals("/")){
 
                 outputStream.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
 
@@ -97,7 +140,7 @@ class HandleConnection implements Runnable{
                 String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 12\r\n\r\n" + userAgent;
                 outputStream.write(userAgentString.getBytes());
 
-            }else if(requestTarget.contains("/files") && requestTarget.length() > 5){
+            }else if(requestTarget.contains("/files") && requestTarget.length() > 5 && httpMethod.equals("GET")){
 
                 String filename = requestTarget.substring(requestTarget.lastIndexOf("/") + 1);
                 File file = new File(filename);
