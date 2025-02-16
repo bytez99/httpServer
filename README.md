@@ -36,11 +36,11 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
   ```
 - Retrieve a file:
   ```sh
-  curl -X GET http://localhost:8080/files/sample
+  curl -X GET http://localhost:8080/files/foo
   ```
 - Create a file with a POST request:
   ```sh
-  curl -X POST http://localhost:8080/files/sample -d "Hello, World!"
+  curl -X POST http://localhost:8080/files/bar -d "Hello, World!"
   ```
 - Echo a string (min. 3 characters):
   ```sh
