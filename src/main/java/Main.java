@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
@@ -134,8 +135,8 @@ class HandleConnection implements Runnable{
                 outputStream.write(echoString.getBytes());
 
             } else if(requestTarget.equals("/user-agent")){
-
-                String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 12\r\n\r\n" + userAgent;
+                byte[] bytes = userAgent.getBytes(StandardCharsets.UTF_8);
+                String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: " + bytes.length +"\r\n\r\n" + userAgent;
                 outputStream.write(userAgentString.getBytes());
 
             }else if(requestTarget.contains("/files") && requestTarget.length() > 5 && httpMethod.equals("GET")){
