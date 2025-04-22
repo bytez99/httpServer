@@ -32,23 +32,23 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 
 - Fetch the User-Agent:
   ```sh
-  curl -X GET http://localhost:8080/user-agent
+  curl -X GET http://localhost:4221/user-agent
   ```
 - Retrieve a file:
   ```sh
-  curl -X GET http://localhost:8080/files/foo
+  curl -X GET http://localhost:4221/files/foo
   ```
 - Create a file with a POST request:
   ```sh
-  curl -X POST http://localhost:8080/files/bar -d "Hello, World!"
+  curl -X POST http://localhost:4221/files/bar -d "Hello, World!"
   ```
 - Echo a string (min. 3 characters):
   ```sh
-  curl -X GET http://localhost:8080/echo/hello
+  curl -X GET http://localhost:4221/echo/hello
   ```
 - Handle an invalid route:
   ```sh
-  curl -X GET http://localhost:8080/invalid
+  curl -X GET http://localhost:4221/invalid
   ```
 
 ## Roadmap & Future Enhancements
