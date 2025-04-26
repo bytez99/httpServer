@@ -55,15 +55,6 @@ class HandleConnection implements Runnable{
         return byteStream.toByteArray();
     }
 
-    public static String BytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : bytes) {
-            hexString.append(String.format("%02X ", b));
-        }
-        return hexString.toString();
-    }
-
-
 
     public static void HandleClient(Socket socket) throws IOException {
 
