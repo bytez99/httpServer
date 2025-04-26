@@ -6,13 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.GZIPOutputStream;
 
 
 public class Main   {
     private static final int PORT = 4221;
 
+
+
   public static void main(String[] args) {
       try {
+
           ServerSocket serverSocket = new ServerSocket(PORT);
           ExecutorService executor = Executors.newCachedThreadPool();
           serverSocket.setReuseAddress(true);
@@ -41,7 +45,28 @@ class HandleConnection implements Runnable{
             }
     }
 
-    public static void HandleClient(Socket socket) {
+    public static byte[] Compress(String data) throws IOException {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        try(GZIPOutputStream gzipSteam = new GZIPOutputStream(byteStream)){
+            gzipSteam.write(data.getBytes(StandardCharsets.UTF_8));
+            gzipSteam.finish();
+        }
+
+        return byteStream.toByteArray();
+    }
+
+    public static String BytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            hexString.append(String.format("%02X ", b));
+        }
+        return hexString.toString();
+    }
+
+
+
+    public static void HandleClient(Socket socket) throws IOException {
+
         System.out.println("Accepted new connection");
         try {
 
@@ -138,16 +163,23 @@ class HandleConnection implements Runnable{
             } else if (requestTarget.contains("/echo") && requestTarget.length() > 5) {
                 String echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.length());
                 String echoString;
-
+                // If Accept-Encoding header is gzip
                 if (acceptEncoding != null && acceptEncoding.contains("gzip")){
-                    echoString = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
+
+                    byte[] compressedEcho = Compress(echo);
+
+
+                    echoString = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: " + compressedEcho.length + "\r\n\r\n";
+                    outputStream.write(echoString.getBytes(StandardCharsets.UTF_8));
+                    // Have to send separately.
+                    outputStream.write(compressedEcho);
                 }else {
                     //System.out.println("echo: " + echo);
                      echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
-
+                    outputStream.write(echoString.getBytes(StandardCharsets.UTF_8));
                 }
 
-                outputStream.write(echoString.getBytes());
+
             // Sends HTTP response with client user-agent
             } else if(requestTarget.equals("/user-agent")){
                 byte[] bytes = userAgent.getBytes(StandardCharsets.UTF_8);
