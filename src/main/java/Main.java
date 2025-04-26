@@ -53,6 +53,7 @@ class HandleConnection implements Runnable{
             String userAgent = null;
             String host = null;
             String contentType = null;
+            String acceptEncoding = null;
             String requestLine = reader.readLine();
             String[] requestLines = requestLine.split(" ");
             String httpMethod = requestLines[0];
@@ -71,6 +72,9 @@ class HandleConnection implements Runnable{
                     contentLength = Integer.parseInt(trim);
                 }else if (line.toLowerCase().startsWith("content-type")){
                     contentType = trim;
+
+                }else if (line.toLowerCase().startsWith("accept-encoding")){
+                    acceptEncoding = trim;
                 }
             }
 
@@ -90,6 +94,7 @@ class HandleConnection implements Runnable{
             System.out.println("Headers:");
             System.out.println("Host:" + host);
             System.out.println("User-Agent:" + userAgent);
+            System.out.println("Accept-Encoding:" + acceptEncoding);
             System.out.println("Content-Type:" + contentType);
             System.out.println("Content-Length:" + contentLength);
 
@@ -98,7 +103,7 @@ class HandleConnection implements Runnable{
 
 
 
-
+            // POST request body to a file
             if(httpMethod.equals("POST") && requestTarget.contains("/files") && requestTarget.length() > 6){
                 try {
                     System.out.println("requestTarget: " + requestTarget);
@@ -123,22 +128,32 @@ class HandleConnection implements Runnable{
 
             }
 
+            // Get request with empty target
             else if (requestTarget.equals("/")){
 
                 outputStream.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
 
+
+            // Sends HTTP response of the first 3 characters from request line
             } else if (requestTarget.contains("/echo") && requestTarget.length() > 5) {
-
                 String echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.length());
-                System.out.println("echo: " + echo);
-                String echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
-                outputStream.write(echoString.getBytes());
+                String echoString;
 
+                if (acceptEncoding != null && acceptEncoding.contains("gzip")){
+                    echoString = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
+                }else {
+                    //System.out.println("echo: " + echo);
+                     echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
+
+                }
+
+                outputStream.write(echoString.getBytes());
+            // Sends HTTP response with client user-agent
             } else if(requestTarget.equals("/user-agent")){
                 byte[] bytes = userAgent.getBytes(StandardCharsets.UTF_8);
                 String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: " + bytes.length +"\r\n\r\n" + userAgent;
                 outputStream.write(userAgentString.getBytes());
-
+            // Responds with file requested if existed, reads file back to user.
             }else if(requestTarget.contains("/files") && requestTarget.length() > 5 && httpMethod.equals("GET")){
 
                 String filename = requestTarget.substring(requestTarget.lastIndexOf("/") + 1);
@@ -154,6 +169,7 @@ class HandleConnection implements Runnable{
                     outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
                 }
             }
+            // Responds with 404 not found, if invalid request.
             else {
                 outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
             }
