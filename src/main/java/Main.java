@@ -254,8 +254,9 @@ class HandleConnection implements Runnable{
                     if (file.exists()) {
 
                         byte[] fileContent = Files.readAllBytes(Paths.get(filename));
-                        String response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 13\r\n\r\n" + new String(fileContent);
+                        String response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + fileContent.length + "\r\n\r\n";
                         outputStream.write(response.getBytes());
+                        outputStream.write(fileContent);
                     } else {
 
                         outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
