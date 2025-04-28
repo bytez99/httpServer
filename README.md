@@ -11,6 +11,7 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
 - **Concurrent Connections**: Handles multiple requests simultaneously.
 - **Root Path (`/`)**: Responds with `200 OK` for requests without a specific path.
 - **404 Not Found**: Returns `404 Not Found` for any invalid or unsupported routes.
+- **GZip Encoding**: Responds with `Content-Encoding: gzip` with a compressed body, when request header `Accept-Content: gzip` is enabled for /echo route.
 
 ## Installation & Running
 
@@ -52,12 +53,9 @@ A lightweight HTTP server built in Java that handles basic HTTP requests, suppor
   ```
 
 ## Roadmap & Future Enhancements
-- Add support for additional HTTP methods (PUT, DELETE)
+- Add support for additional HTTP methods (PUT, DELETE) 
 - Implement persistent logging
 - Improve error handling and request validation
-- Add support for the Accept-Encoding and Content-Encoding headers.
-- Add support for Accept-Encoding headers that contain multiple compression schemes.
-- Add support for gzip compression
-
-
-
+- Add support for the Accept-Encoding and Content-Encoding headers. ✔️
+- Add support for Accept-Encoding headers that contain multiple compression schemes. ✔️
+- Add support for gzip compression ✔️
