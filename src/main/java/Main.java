@@ -32,7 +32,6 @@ public class Main   {
 
 class HandleConnection implements Runnable{
     private Socket socket;
-    String echo;
     public HandleConnection(Socket socket) {
         this.socket = socket;
     }
