@@ -160,7 +160,7 @@ class HandleConnection implements Runnable{
 
             // Sends HTTP response of the first 3 characters from request line
             } else if (requestTarget.contains("/echo") && requestTarget.length() > 5) {
-                String echo = "";
+                String echo;
                 int ourIndex = 0;
                 try {
                     echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.lastIndexOf("/") + 4);
