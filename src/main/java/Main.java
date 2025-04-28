@@ -32,6 +32,7 @@ public class Main   {
 
 class HandleConnection implements Runnable{
     private Socket socket;
+    String echo;
     public HandleConnection(Socket socket) {
         this.socket = socket;
     }
@@ -76,6 +77,8 @@ class HandleConnection implements Runnable{
             String requestTarget = requestLines[1];
             String httpVersion = requestLines[2];
             int contentLength = 0;
+            boolean isPersistent = false;
+
 
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -119,6 +122,12 @@ class HandleConnection implements Runnable{
 
 
 
+            if (httpVersion.equals("HTTP/1.1")){
+                isPersistent = true;
+
+            }
+
+
             // POST request body to a file
             if(httpMethod.equals("POST") && requestTarget.contains("/files") && requestTarget.length() > 6){
                 try {
@@ -152,10 +161,27 @@ class HandleConnection implements Runnable{
 
             // Sends HTTP response of the first 3 characters from request line
             } else if (requestTarget.contains("/echo") && requestTarget.length() > 5) {
-                String echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.length());
+                String echo = "";
+                int ourIndex = 0;
+                try {
+                    echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, requestTarget.lastIndexOf("/") + 4);
+
+                } catch (StringIndexOutOfBoundsException e) {
+                    // Gets starting index from exception message
+                    int startIndex = e.getMessage().lastIndexOf("length") + 7;
+                    // Last index
+                    int endIndex = startIndex + 1;
+                    // Create substring, parse to int
+                    ourIndex = Integer.parseInt(e.getMessage().substring(startIndex, endIndex));
+                    // Get our new string echo to respond with
+                    echo = requestTarget.substring(requestTarget.lastIndexOf("/") + 1, ourIndex);
+
+
+                }
+
                 String echoString;
                 // If Accept-Encoding header is gzip
-                if (acceptEncoding != null && acceptEncoding.contains("gzip")){
+                if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
 
                     byte[] compressedEcho = Compress(echo);
 
@@ -164,14 +190,14 @@ class HandleConnection implements Runnable{
                     outputStream.write(echoString.getBytes(StandardCharsets.UTF_8));
                     // Have to send separately.
                     outputStream.write(compressedEcho);
-                }else {
+                } else {
                     //System.out.println("echo: " + echo);
-                     echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: 3\r\n\r\n" + echo;
+                    echoString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: " + echo.length() + "\r\n\r\n" + echo;
                     outputStream.write(echoString.getBytes(StandardCharsets.UTF_8));
                 }
 
 
-            // Sends HTTP response with client user-agent
+                // Sends HTTP response with client user-agent
             } else if(requestTarget.equals("/user-agent")){
                 byte[] bytes = userAgent.getBytes(StandardCharsets.UTF_8);
                 String userAgentString = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: " + bytes.length +"\r\n\r\n" + userAgent;
@@ -197,9 +223,15 @@ class HandleConnection implements Runnable{
                 outputStream.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
             }
 
-            outputStream.flush();
-            outputStream.close();
-            socket.close();
+            if (!isPersistent) {
+                System.out.println("Persistent:" + isPersistent);
+
+                outputStream.flush();
+                outputStream.close();
+                socket.close();
+            }
+
+            System.out.println("Persistent Connection:" + isPersistent);
 
 
 
