@@ -62,18 +62,19 @@ class HandleConnection implements Runnable{
 
 
     public static void HandleClient(Socket socket) throws IOException {
-
         System.out.println("New connection accepted");
         System.out.println("Client: " + socket.getRemoteSocketAddress() + "\n");
-        InputStream inputStream = socket.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        OutputStream outputStream = socket.getOutputStream();
-
-        int requestCount = 0;
 
         try {
 
+
+            InputStream inputStream = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            OutputStream outputStream = socket.getOutputStream();
+
+            int requestCount = 0;
 
             boolean isPersistent = true;
             String connectionPersistence = "Connection: keep-alive";
@@ -175,11 +176,12 @@ class HandleConnection implements Runnable{
                             FileWriter fileWriter = new FileWriter(file);
                             fileWriter.write(requestBody);
                             fileWriter.close();
-                            String response = "HTTP/1.1 201 Created\r\n\n\n";
+                            String response = "HTTP/1.1 201 Created\r\nContent-Length: 0" + "\n\n";
                             outputStream.write(response.getBytes());
+                            outputStream.flush();
 
                         } else {
-                            String response = "HTTP/1.1 404 Not Found\r\n\n\n";
+                            String response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\n\n";
                             outputStream.write(response.getBytes());
                         }
 
@@ -273,10 +275,6 @@ class HandleConnection implements Runnable{
             outputStream.flush();
             outputStream.close();
             socket.close();
-
-
-
-
 
 
         }catch (IOException e) {
